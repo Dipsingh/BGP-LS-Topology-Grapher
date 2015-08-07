@@ -99,5 +99,4 @@ for n in r['network-topology']['topology'][2]['link']:
 
 
 print node_list
-
 draw_graph(node_list,igp_cost_dict)
