@@ -98,7 +98,7 @@ class Link:
 
 # The url contains details to extract BGP-LS info from the ODL
 
-result = urllib.urlopen('http://admin:admin@172.16.2.128:8181/restconf/operational/network-topology:network-topology/')
+result = urllib.urlopen('http://admin:admin@192.168.24.128:8181/restconf/operational/network-topology:network-topology/')
 r= json.load(result.fp)
 result.close()
 
