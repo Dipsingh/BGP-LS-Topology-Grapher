@@ -2,11 +2,12 @@ __author__ = 'dipsingh'
 
 import urllib
 import json
-from pprint import pprint
-import re,pylab
+import re
 import networkx as nx
 import matplotlib.pyplot as plt
-import numpy as np
+
+
+# Function to extract Router-ID
 
 def extract_routerid (str):
     unicode_strlist = str.split("&")
@@ -17,6 +18,8 @@ def extract_routerid (str):
     final_router_id_list = router_id_string.split("=")
     router_id = final_router_id_list[1]
     return router_id
+
+#Function to extract IS-IS Level details
 
 def extract_isis_level(str):
     unicode_strlist = str.split("/")
@@ -29,6 +32,7 @@ def extract_isis_level(str):
     return isis_level
 
 
+#Function for drawing the graph
 
 def draw_graph(graph,labels=None, graph_layout='spectral', node_size=1600, node_color='blue', node_alpha=0.3,node_text_size=12,edge_color='red', edge_alpha=0.2, edge_tickness=1,
                edge_text_pos=0.4,text_font='sans-serif'):
@@ -92,10 +96,14 @@ class Link:
         return cls._link_instance_track
 
 
+# The url contains details to extract BGP-LS info from the ODL
+
 result = urllib.urlopen('http://admin:admin@172.16.2.128:8181/restconf/operational/network-topology:network-topology/')
 r= json.load(result.fp)
 result.close()
 
+
+# For loop to go over the Node Attributes and write that info in Json format
 
 for n in r['network-topology']['topology'][2]['node']:
     if len(n['l3-unicast-igp-topology:igp-node-attributes']) == 0 :
@@ -108,9 +116,10 @@ for n in r['network-topology']['topology'][2]['node']:
             with open('node_attributes.json','a') as fh:
                 json.dump(i.__dict__,fh,indent = 4)
 
-
 node_list = []
 igp_cost_dict = {}
+
+#For loop to go over the link attributes and pass that info to draw the graph
 
 for n in r['network-topology']['topology'][2]['link']:
     source_router_id = extract_routerid (n['source']['source-node'])
@@ -123,6 +132,8 @@ for n in r['network-topology']['topology'][2]['link']:
     igp_cost_dict [node_pair] = igp_metric
     l = Link(source_router_id,destination_router_id,igp_metric,isis_level)
 
+# Both For loops Print the Node and Link Details
+
 for node in Node._instance_track:
     print ("Node Attributes for {0} is IS-IS Id {1}, Router-ID {2}, Prefix and there Metric {3}".format(node.node_name,node.iso_system_id,node.router_id,node.prefix_metric))
 
@@ -130,4 +141,8 @@ for l in Link._link_instance_track:
     print ("Source Router is {0} Destination Router is  {1}, IGP Metric between them is {2} and IS-IS Level is {3}".format(l.source_router_id,l.destination_router_id,l.igp_metric,l.isis_level))
 
 draw_graph(node_list,igp_cost_dict)
+
+
+
+
 
